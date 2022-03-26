@@ -1,0 +1,49 @@
+short int ust = 6;
+short int randomNumber;
+short int prevNumber = 0; //bir önceki sayıyı tutan değer
+
+short int ledPins[] = {3,4,5,6,7,8,9,10,11};//ledler ve pin girişlerini tanımladık.
+char* zar[] = {"000000000", "000010000", "100000001", "100010001", "101000101", "101010101", "111000111"};
+-
+void randomNumberGenerate(){//random sayı oluşturuyoruz.
+  randomNumber = random(ust + 1);//6’yı sayması için.
+while(randomNumber == prevNumber){ //Üst üste aynı sayı gelmemesi için.
+    randomNumber = random(sinir + 1);
+  }
+  prevNumber = randomNumber;
+}
+
+void zarLed(String data){//1 000010000 çıkan değer neyse onun yanmasını sağlar.
+  Serial.println("Zar Led : " + data);
+  short int len = data.length();
+  for(short int i = 0; i<9; i++){
+    digitalWrite(ledPins[i], String(data[i]).toInt());
+  }
+}
+
+void zarLedSondur(){//zar yandıktan belli bir süre sonra sönmesi için.
+  for(short int i = 0; i<9; i++){
+    digitalWrite(ledPins[i], LOW);//led sönüyor.
+  }
+}
+//1 kez çalışır ve devamını void loop a bırakır.
+void setup() {
+  Serial.begin(9600);//haberleşme hızını belirttik portumuzu 9600 olarak ayarladık.
+  for(short int i = 0; i < 9; i++){
+    pinMode(ledPins[i], OUTPUT);//ledlerin bağlandığı pin çıkışı
+  }
+  pinMode(12, INPUT);//12.pini giriş olarak ayarladık.
+  randomSeed(analogRead(0));//Gecikme ile rastgele bir sayı üretip ve oluşturulan numarayı okuttuk.
+  delay(1000);
+}
+//devamlı çalışan kod kısmı
+void loop() {//random olarak belirlenen ledleri yakıyoruz
+  if(digitalRead(12) == 1){
+    while(digitalRead(12) == 1);//Buton arkını engellemek için
+    randomNumberGenerate();
+    Serial.println("Random Sayi : " + String(randomNumber));
+    zarLed(zar[randomNumber]);
+    delay(1000);//ledler 1000 milisaniye sonra söner.
+    zarLedSondur();
+  }
+}
